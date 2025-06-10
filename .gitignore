@@ -181,6 +181,8 @@ DocProject/Help/*.hhp
 DocProject/Help/Html2
 DocProject/Help/html
 
+configs
+
 # Click-Once directory
 publish/
 
@@ -404,3 +406,4 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
