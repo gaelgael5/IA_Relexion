@@ -40,7 +40,7 @@ namespace AILib.Configurations
         {
 
             return new ChatSession(this);
-          
+
         }
 
 
@@ -77,7 +77,7 @@ namespace AILib.Configurations
         }
 
 
-        public List<ChatMessage> GetChatMessages(Action<List<ChatMessage>>? action = null)
+        public ChatMessages GetChatMessages(Action<List<ChatMessage>>? action = null)
         {
 
             var messages = new ChatMessages(Messages.Count);
@@ -94,8 +94,7 @@ namespace AILib.Configurations
             foreach (var message in Messages)
                 if (message.Position == Position.Post && !string.IsNullOrWhiteSpace(message.Text))
                     messages.Add(message.GetMessage());
-
-
+         
             return messages;
 
         }

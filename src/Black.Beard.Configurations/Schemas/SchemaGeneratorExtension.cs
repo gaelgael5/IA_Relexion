@@ -14,7 +14,7 @@ namespace Bb.Schemas
         /// <remarks>
         /// This method initializes the schema generator, creating a singleton instance.
         /// </remarks>
-        public static IConfigurationRoot ResolveConfiguration<T>(this IConfigurationRoot configuration, out T result)
+        public static IConfigurationRoot ResolveConfiguration<T>(this IConfigurationRoot configuration, out T? result)
         {
 
             if (configuration == null)
@@ -26,7 +26,19 @@ namespace Bb.Schemas
             return configuration;
         }
 
-       
+        public static bool TryResolveConfiguration<T>(this IConfigurationRoot configuration, out T? result)
+        {
+
+            if (configuration == null)
+                throw new ArgumentNullException(nameof(configuration), "Configuration cannot be null.");
+
+            var section = SchemaGenerator.GetSchemaName(typeof(T));
+            result = configuration.GetSection(section).Get<T>();
+            SchemaGenerator.GenerateSchema(typeof(T));
+            return result != null;
+        }
+
+
     }
 
 }

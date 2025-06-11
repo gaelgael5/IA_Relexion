@@ -81,22 +81,22 @@ namespace Bb.Gits
         /// the url of the git repository
         /// </summary>
         [Required]
-        public string GitRemoteUrl { get; set; }
+        public string? GitRemoteUrl { get; set; }
 
         /// <summary>
         /// the user name
         /// </summary>
-        public string GitUserName { get; set; }
+        public string? GitUserName { get; set; }
 
         /// <summary>
         /// the user email
         /// </summary>
-        public string GitEmail { get; set; }
+        public string? GitEmail { get; set; }
 
         /// <summary>
         /// the user password
         /// </summary>
-        public string GitPassword { get; set; }
+        public string? GitPassword { get; set; }
 
         /// <summary>
         /// the branch to use. by default the main branch is used.

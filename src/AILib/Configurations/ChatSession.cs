@@ -1,5 +1,6 @@
 ﻿using Azure.AI.OpenAI;
 using OpenAI.Chat;
+using System;
 
 namespace AILib.Configurations
 {
@@ -28,6 +29,12 @@ namespace AILib.Configurations
         }
 
 
+        public Func<ChatSession, bool>? MustExecute { get; set; }
+
+        public ChatMessages Messages { get; private set; }
+
+        public uint Hash { get; private set; }
+
         public async Task<ChatMessageContent?> Ask(Action<List<ChatMessage>>? action = null)
         {
 
@@ -35,11 +42,17 @@ namespace AILib.Configurations
 
             if (chat != null)
             {
-                var messages = _openAIOption.GetChatMessages(action);
+
+                Messages = _openAIOption.GetChatMessages(action);
+                this.Hash = Messages.GetHash();
+
+                if (MustExecute != null && !MustExecute(this))
+                    return null; // Skip execution if MustExecute condition is not met
+
                 ChatCompletion? completion = null;
                 try
                 {
-                    completion = await chat.CompleteChatAsync(messages, _options);
+                    completion = await chat.CompleteChatAsync(Messages, _options);
                 }
                 catch (Exception)
                 {

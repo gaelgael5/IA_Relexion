@@ -4,6 +4,7 @@ using LibGit2Sharp;
 using LibGit2Sharp.Handlers;
 using System.Diagnostics;
 using System.Globalization;
+using System.Xml.Schema;
 
 namespace Bb.Gits
 {
@@ -127,7 +128,7 @@ namespace Bb.Gits
         }
 
 
-        public GitConfiguration GitConfiguration { get; set; }
+        public GitConfiguration? GitConfiguration { get; set; }
 
         /// <summary>
         /// Refreshes the Git repository in the specified folder by cloning or pulling changes.
@@ -187,7 +188,8 @@ namespace Bb.Gits
             {
 
                 case GitStatus.NotInitialized:
-                    return Clone(f, branch ?? GitConfiguration.GitBranch ?? "main");
+                    var b = branch ?? GitConfiguration?.GitBranch ?? "main";
+                    return Clone(f, b);
 
                 case GitStatus.Initialized:
                     return Pull(f);
@@ -209,6 +211,10 @@ namespace Bb.Gits
         {
             try
             {
+
+                if (GitConfiguration == null)
+                    throw new InvalidOperationException("GitConfiguration is not set.");
+
                 using var repo = new Repository(localFolder);
                 var pullOptions = GetPullOptions();
                 var identity = new Identity(GitConfiguration.GitUserName, GitConfiguration.GitEmail);
@@ -229,6 +235,13 @@ namespace Bb.Gits
 
         private bool Clone(string localFolder, string branch)
         {
+
+            if (GitConfiguration == null)
+                throw new InvalidOperationException("GitConfiguration is not set.");
+
+            if (string.IsNullOrEmpty(GitConfiguration.GitRemoteUrl))
+                throw new InvalidOperationException("GitRemoteUrl is not set in GitConfiguration.");
+
             try
             {
                 var cloneOptions = GetCloneOptions(branch);
@@ -280,15 +293,19 @@ namespace Bb.Gits
         private CredentialsHandler GetCredential()
         {
 
-            if (!GitConfiguration.HasPassword)
+            if (GitConfiguration != null && !GitConfiguration.HasPassword)
                 return (_url, _user, _cred) => new LibGit2Sharp.DefaultCredentials();
 
             return (_url, _user, _cred) =>
             {
+
+                if (GitConfiguration == null)
+                    throw new InvalidOperationException("GitConfiguration is not set.");
+
                 return new UsernamePasswordCredentials()
                 {
-                    Username = GitConfiguration.GitUserName,
-                    Password = GitConfiguration.GitPassword
+                    Username = GitConfiguration.GitUserName ?? throw new InvalidOperationException("git username is not specified"),
+                    Password = GitConfiguration.GitPassword ?? throw new InvalidOperationException("git password is not specified")
                 };
             };
         }

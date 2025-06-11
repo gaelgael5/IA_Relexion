@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AILibTest", "AILibTest\AILi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Black.Beard.Configurations", "Black.Beard.Configurations\Black.Beard.Configurations.csproj", "{903EE622-82CE-4868-8696-5665C7A66B6C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleAI", "ConsoleAI\ConsoleAI.csproj", "{82151207-90E9-4202-A0FA-F38AA03B62FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{903EE622-82CE-4868-8696-5665C7A66B6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{903EE622-82CE-4868-8696-5665C7A66B6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{903EE622-82CE-4868-8696-5665C7A66B6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82151207-90E9-4202-A0FA-F38AA03B62FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82151207-90E9-4202-A0FA-F38AA03B62FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82151207-90E9-4202-A0FA-F38AA03B62FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82151207-90E9-4202-A0FA-F38AA03B62FD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

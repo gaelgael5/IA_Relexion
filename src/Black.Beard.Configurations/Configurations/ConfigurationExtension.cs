@@ -85,8 +85,8 @@ namespace Bb.Configurations
 
                 }
 
-                //if (f != null && (filter == null || filter(f)))
-                Load(self, f);
+                if (f != null)
+                    Load(self, f);
 
             }
 

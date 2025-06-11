@@ -1,33 +1,24 @@
-﻿namespace AILib
+﻿using Bb;
+
+namespace AILib
 {
 
     public struct Document
     {
 
-
-        public static readonly Document Empty = new Document(null, null);
-
-        public Document(FileInfo? sourcFile, FileInfo? targetFile)
+        public Document(FileInfo? sourcFile, FileInfo? targetFile, FolderIndex index)
         {
-
             this._sourceFile = sourcFile;
             this._targetFile = targetFile;
-
+            this.Index = index;
             var path = sourcFile?.FullName;
-            if (!string.IsNullOrEmpty(path))
-                this._hashSource = path.ComputeFileHash();
-            else
-                this._hashSource = string.Empty;
-
         }
 
         public readonly FileInfo? SourceFile => _sourceFile;
 
-        public string HashSource => _hashSource;
+       
 
         public string SourceName => _sourceFile?.FullName ?? string.Empty;
-
-        public string SourceContent => _sourceFile ==null ? string.Empty : File.ReadAllText(_sourceFile.FullName);
 
         public int SourceLength => (int)(_sourceFile?.Length ?? 0);
 
@@ -38,17 +29,11 @@
 
         private readonly FileInfo? _sourceFile;
         private readonly FileInfo? _targetFile;
-        private readonly string _hashSource;
 
-    }
+        public FolderIndex Index { get; }
 
-    public static class DocumentExtensions
-    {
+        public static readonly Document Empty = new Document(null, null, new FolderIndex());
 
-        public static bool IsEmpty(this Document document)
-        {
-            return document.SourceFile == null && document.TargetFile == null;
-        }
 
     }
 

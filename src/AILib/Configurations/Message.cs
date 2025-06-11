@@ -1,11 +1,12 @@
 using AILib.Helpers;
 using Bb;
-using DocumentFormat.OpenXml.Drawing;
 using OpenAI.Chat;
 using System.Text;
 
 namespace AILib.Configurations
-{
+{  
+
+
     public class Message
     {
 
@@ -71,7 +72,7 @@ namespace AILib.Configurations
 
         }
 
-        public static ChatMessage CreateUserTextDocument(string path)
+        public static ChatMessage CreateUserTextAttachedDocument(string path)
         {
 
             var file = path.AsFile();

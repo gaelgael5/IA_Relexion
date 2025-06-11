@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ConsoleAI": {
+      "commandName": "Project",
+      "commandLineArgs": "--config \"d:\\test\\ai\" --parse \"D:\\src_pickup\\Colis21\\src\" --output \"D:\\test\\outputc21\" --pattern \"*.cs\" --name \".md\" --service \"Dev\" --prompt \"file:Documentation.txt\""
+    }
+  }
+}

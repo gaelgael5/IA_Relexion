@@ -1,7 +1,10 @@
+using AILib.Helpers;
 using OpenAI.Chat;
 
 namespace AILib.Configurations
 {
+
+
     public class ChatMessages : List<ChatMessage>
     {
 
@@ -19,6 +22,16 @@ namespace AILib.Configurations
         {
 
         }
+
+        public uint GetHash()
+        {
+            uint hash = 0;
+            foreach (var message in this)
+                hash ^= message.Content.GetHash();
+            return hash;
+
+        }
+
 
     }
 

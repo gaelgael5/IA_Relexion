@@ -147,7 +147,7 @@ namespace Bb.Schemas
         /// <summary>
         /// The singleton instance of the <see cref="SchemaGenerator"/> class.
         /// </summary>
-        private static SchemaGenerator _instance;
+        private static SchemaGenerator? _instance;
 
     }
 

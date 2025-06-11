@@ -43,15 +43,18 @@ namespace IALibTest
             config.ResolveConfiguration(out _openAiOptions)
                 ;
 
+            if (_openAiOptions == null)
+                throw new InvalidOperationException("OpenAI options not found in configuration.");
+
         }
 
         [Fact]
-        public void Test1()
+        public void ParseTest()
         {
 
             var pathTarget = Path.Combine(_directoryGit.FullName, "Documentation");
 
-            FolderParser.ParseFolder(_directoryProject.FullName, pathTarget, (name) => name + ".md", "*.cs")
+            FolderParser.Parse(new IndexStore(), _directoryProject, pathTarget.AsDirectory(), (name) => name + ".md", "*.cs")
                 .ToList()
                 .ForEach(item =>
                 {
@@ -65,6 +68,9 @@ namespace IALibTest
         [Fact]
         public async Task TestChatGptClient()
         {
+
+            if (_openAiOptions == null)
+                throw new InvalidOperationException("OpenAI options not found in configuration.");
 
             string prompt = @"Voici un fichier C# :
 public class Test 
@@ -98,6 +104,9 @@ Peux-tu me proposer une version plus claire ?";
         public async Task TestWithFileToDocument()
         {
 
+            if (_openAiOptions == null)
+                throw new InvalidOperationException("OpenAI options not found in configuration.");
+
             var pathToParse = _directoryGit.Combine("src", "AILib", "Helpers", "OpenPdfExtensions.cs").AsFile(); // Chemin vers le fichier à analyser
 
 
@@ -123,7 +132,7 @@ Peux-tu me proposer une version plus claire ?";
 
                     if (!string.IsNullOrEmpty(message.Text))
                     {
-                        _directoryBin.Combine("OpenPdfExtensions.cs").Save(message.Text);
+                        // _directoryBin.Combine("OpenPdfExtensions.cs").Save(message.Text);
                     }
                     else
                     {
@@ -142,7 +151,7 @@ Peux-tu me proposer une version plus claire ?";
         private readonly string _directoryConfigurations;
         private readonly string _directorySchemas;
         private readonly string _directoryPrompts;
-        private readonly AzureOptions _openAiOptions;
+        private readonly AzureOptions? _openAiOptions;
 
     }
 

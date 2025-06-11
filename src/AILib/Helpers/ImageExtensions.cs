@@ -1,5 +1,6 @@
 ﻿namespace AILib.Helpers
 {
+
     public static class ImageExtensions
     {
 

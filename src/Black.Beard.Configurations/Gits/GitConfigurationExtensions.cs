@@ -5,6 +5,7 @@ using Microsoft.Extensions.FileProviders;
 
 namespace Bb.Gits
 {
+
     public static class GitConfigurationExtensions
     {
 
