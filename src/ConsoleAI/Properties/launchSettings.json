@@ -2,7 +2,7 @@
   "profiles": {
     "ConsoleAI": {
       "commandName": "Project",
-      "commandLineArgs": "--config \"d:\\test\\ai\" --parse \"D:\\src_pickup\\Colis21\\src\" --output \"D:\\test\\outputc21\" --pattern \"*.cs -folder\" --name \".md\" --service \"Dev\" --prompt \"file:DocumentationFonctionnelle.txt\""
+      "commandLineArgs": "--config \"d:\\test\\ai\" --parse \"D:\\src_pickup\\Colis21\\src\\Pssa.Colis21.TrackingApi\" --output \"D:\\test\\outputc21\\Pssa.Colis21.TrackingApi\" --pattern \"*.cs -all\" --name \".md\" --service \"Dev\" --prompt \"file:DocumentationFonctionnelle.txt\""
     }
   }
 }

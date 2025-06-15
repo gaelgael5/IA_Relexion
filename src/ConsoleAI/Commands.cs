@@ -24,10 +24,25 @@ namespace ConsoleAI
     // --config "d:\test\ai"
     // --parse "D:\src_pickup\Colis21\src"
     // --output "D:\test\outputc21"
-    // --pattern "*.cs -folder"
+    // --pattern "*.cs"
     // --name ".md"
     // --service "Dev"
     // --prompt "file:Documentation.txt"
+
+
+    // --config "d:\test\ai" 
+    // --parse "D:\src_pickup\Colis21\src" 
+    // --output "D:\test\outputc21" 
+    // --pattern "*.cs -folder" 
+    // --name ".md" --service "Dev" 
+    // --prompt "file:DocumentationFonctionnelle.txt"
+
+    // --config "d:\test\ai" 
+    // --parse "D:\src_pickup\Colis21\src\Pssa.Colis21.TrackingApi" 
+    // --output "D:\test\outputc21\Pssa.Colis21.TrackingApi" 
+    // --pattern "*.cs -all" 
+    // --name ".md" --service "Dev" 
+    // --prompt "file:DocumentationFonctionnelle.txt"
 
 
     public static class Commands
@@ -47,8 +62,6 @@ namespace ConsoleAI
             }
 
         }
-
-
 
         /// <summary>
         /// Download configuration from git and reload the configuration files.
@@ -119,8 +132,8 @@ namespace ConsoleAI
                 else if (ctx.Strategy == ParseStrategy.ByFolder)
                     items = FolderParser.ParseByFolder(store, ctx.DirectorySource, ctx.DirectoryTarget, (name) => name + ctx.OutName, ctx.PatternSource);
 
-                //else if (ctx.Strategy == ParseStrategy.All)
-                //    items = FolderParser.Parse(store, ctx.DirectorySource, ctx.DirectoryTarget, (name) => name + ctx.OutName, ctx.PatternSource);
+                else if (ctx.Strategy == ParseStrategy.All)
+                    items = FolderParser.ParseOneShot(store, ctx.DirectorySource, ctx.DirectoryTarget, (name) => name + ctx.OutName, ctx.PatternSource);
 
                 else
                 {
