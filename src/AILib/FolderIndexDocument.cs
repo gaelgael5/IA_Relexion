@@ -10,15 +10,15 @@
 
         public void Map(Document item)
         {
-            this.Name = item.SourceFile?.Name;
-            this.Length = item.SourceLength;
+            this.Name = item.GetName();
+            this.Length = item.GetLength();
         }
 
         public string? Name { get; set; }
 
         public uint Hash { get; set; }
 
-        public int? Length { get; set; }
+        public long? Length { get; set; }
 
     }
 }

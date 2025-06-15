@@ -111,37 +111,39 @@ namespace AILib.Helpers
 
         }
 
-        public static bool SaveContent(this ChatMessageContentPart message, FileInfo filename)
+        public static bool SaveContent(this ChatMessageContentPart message, FileInfo file,  out string filename)
         {
-
+            
             if (message == null)
                 throw new ArgumentNullException(nameof(message), "ChatMessageContentPart cannot be null.");
 
-            var n = Path.GetFileNameWithoutExtension(filename.Name);
-            bool WithoutExtension = n == filename.Name;
+            filename = Path.GetFileNameWithoutExtension(file.Name);
+            bool WithoutExtension = filename == file.Name;
             string extension = ".txt";
             if (!WithoutExtension)
-                extension = filename.Extension;
+                extension = file.Extension;
 
+            if (file.Directory == null)
+                throw new ArgumentNullException(nameof(file), "File name cannot be null.");
 
             // Ensure the directory exists
-            filename.Directory.Refresh();
-            if (!filename.Directory.Exists)
-                filename.Directory.Create();
+            file.Directory.Refresh();
+            if (!file.Directory.Exists)
+                file.Directory.Create();
 
-            n = filename.Directory.Combine(n);
+            filename = file.Directory.Combine(filename);
 
             if (!string.IsNullOrEmpty(message.Text))
             {
 
                 if (WithoutExtension)
                 {
-                    n += extension;
-                    n.Save(message.Text);
+                    filename += extension;
+                    filename.Save(message.Text);
                 }
                 else
                 {
-                    filename.Save(message.Text);
+                    file.Save(message.Text);
                 }
                     
 
@@ -153,14 +155,14 @@ namespace AILib.Helpers
                 var mime = message.ImageBytesMediaType.ResolveExtensionFromMediaType();
 
                 if (WithoutExtension)
-                    n += mime;
+                    filename += mime;
 
                 else
                 {
 
                 }
 
-                File.WriteAllBytes(n, message.ImageBytes.ToArray());
+                File.WriteAllBytes(filename, message.ImageBytes.ToArray());
 
             }
             else

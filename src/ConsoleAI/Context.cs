@@ -11,7 +11,7 @@ namespace ConsoleAI
     public class Context
     {
 
-        public Context(string configFolder, DirectoryInfo directorySource, DirectoryInfo directoryTarget, string prompt, string azureService)
+        public Context(string configFolder, DirectoryInfo directorySource, DirectoryInfo directoryTarget, string prompt, string azureService, string patternSource)
         {
 
             DirectoryConfig = (configFolder ?? Directory.GetCurrentDirectory()).AsDirectory();
@@ -19,7 +19,6 @@ namespace ConsoleAI
                 DirectoryConfig.Create();
 
             DirectoryPrompts = DirectoryConfig.Combine("Prompts") ?? throw new InvalidOperationException("Configurations directory not found.");
-
 
             // Charge la configuration
             Configuration = new ConfigurationBuilder()
@@ -33,7 +32,6 @@ namespace ConsoleAI
 
             DirectorySource = directorySource;
             DirectoryTarget = directoryTarget;
-            PatternSource = "*.*";
             OutName = ".txt";
             AzureServiceName = azureService;
 
@@ -42,6 +40,26 @@ namespace ConsoleAI
                 var filePath = DirectoryPrompts.Combine(prompt.Substring(5).Trim());
                 if (File.Exists(filePath))
                     prompt = filePath.LoadFromFile();
+            }
+
+            HashPrompt = prompt.CalculateCrc32(); // Ensure the prompt is processed for CRC32
+
+            PatternSource = patternSource;
+            if (patternSource == null || patternSource.Trim().Length == 0)
+                PatternSource = "*.*"; // Default pattern
+            else
+            {
+                patternSource = patternSource.ToLowerInvariant().Trim();
+                if (patternSource.EndsWith("-folder"))
+                {
+                    Strategy = ParseStrategy.ByFolder;
+                    PatternSource = patternSource.Split(' ')[0];
+                }
+                else if (patternSource.EndsWith("-all"))
+                {
+                    Strategy = ParseStrategy.All;
+                    PatternSource = patternSource.Split(' ')[0];
+                }
             }
 
             this.Prompt = prompt ?? throw new ArgumentNullException(nameof(prompt), "Prompt cannot be null or empty.");
@@ -59,16 +77,24 @@ namespace ConsoleAI
         public DirectoryInfo DirectorySource { get; }
 
         public DirectoryInfo DirectoryTarget { get; }
-
+        public uint HashPrompt { get; }
         public string PatternSource { get; set; }
 
         public string OutName { get; set; }
 
         public string AzureServiceName { get; }
-        
+
         public string Prompt { get; }
+
+        public ParseStrategy Strategy { get; }
 
     }
 
+    public enum ParseStrategy
+    {
+        FileByFile,
+        ByFolder,
+        All,
+    }
 
 }

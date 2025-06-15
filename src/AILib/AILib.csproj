@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.AI.OpenAI" Version="2.1.0" />
+    <PackageReference Include="Azure.AI.OpenAI" Version="2.2.0-beta.4" />
     <PackageReference Include="Azure.Identity" Version="1.14.0" />
     <PackageReference Include="Black.Beard.Helpers" Version="2.0.59" />
     <PackageReference Include="Black.Beard.Helpers.ContentLoaders.Files" Version="2.0.59" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
-    <PackageReference Include="PdfPig" Version="0.1.10" />
+    <PackageReference Include="PdfPig" Version="0.1.11-alpha-20250602-89abf" />
   </ItemGroup>
 
 </Project>

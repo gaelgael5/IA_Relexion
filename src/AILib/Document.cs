@@ -6,33 +6,58 @@ namespace AILib
     public struct Document
     {
 
-        public Document(FileInfo? sourcFile, FileInfo? targetFile, FolderIndex index)
+
+        public Document(FileInfo? targetFile, FolderIndex index, params FileInfo[] sourceFiles)
         {
-            this._sourceFile = sourcFile;
+            this._sourceFiles = new List<FileInfo>(sourceFiles);
             this._targetFile = targetFile;
             this.Index = index;
-            var path = sourcFile?.FullName;
         }
 
-        public readonly FileInfo? SourceFile => _sourceFile;
 
-       
+        public string GetName()
+        {
+            if (_hash == null)
+            {
+                uint hash = 0;
+                var sortedFileList = SourceFiles.OrderBy(c => c.Name);
+                foreach (var item in sortedFileList)
+                    hash ^= Crc32.CalculateCrc32(item?.Name ?? string.Empty);
+                _hash = hash.ToString();
+            }
+            return _hash;
+        }
 
-        public string SourceName => _sourceFile?.FullName ?? string.Empty;
+        public long GetLength()
+        {
+            
+            if (_length == null)
+            {
+                long length = 0;
+                foreach (var item in SourceFiles)
+                    length += item.Length;
+                _length = length;
+            }
 
-        public int SourceLength => (int)(_sourceFile?.Length ?? 0);
+            return _length.Value;
 
-        public int SourceNameLength => _sourceFile?.FullName.Length ?? 0;
+        }
+
 
         public readonly FileInfo? TargetFile => _targetFile;
-
-
-        private readonly FileInfo? _sourceFile;
-        private readonly FileInfo? _targetFile;
-
+        
         public FolderIndex Index { get; }
 
-        public static readonly Document Empty = new Document(null, null, new FolderIndex());
+        public static readonly Document Empty = new Document(null, new FolderIndex());
+
+        public readonly List<FileInfo> SourceFiles => _sourceFiles;
+
+
+
+        private readonly List<FileInfo> _sourceFiles;
+        private readonly FileInfo? _targetFile;
+        private string? _hash = null;
+        private long? _length = null;
 
 
     }

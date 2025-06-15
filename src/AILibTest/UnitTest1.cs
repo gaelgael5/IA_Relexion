@@ -54,13 +54,12 @@ namespace IALibTest
 
             var pathTarget = Path.Combine(_directoryGit.FullName, "Documentation");
 
-            FolderParser.Parse(new IndexStore(), _directoryProject, pathTarget.AsDirectory(), (name) => name + ".md", "*.cs")
+            FolderParser.ParseFileByFile(new IndexStore(), _directoryProject, pathTarget.AsDirectory(), (name) => name + ".md", "*.cs")
                 .ToList()
                 .ForEach(item =>
                 {
-                    Assert.NotNull(item.SourceFile);
+                    Assert.NotNull(item.SourceFiles);
                     Assert.NotNull(item.TargetFile);
-                    Assert.Equal(Path.GetFileNameWithoutExtension(item.SourceFile.Name), Path.GetFileNameWithoutExtension(item.TargetFile.Name));
                 });
 
         }

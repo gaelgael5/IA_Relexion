@@ -8,16 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.AI.OpenAI" Version="2.1.0" />
+    <PackageReference Include="Azure.AI.OpenAI" Version="2.2.0-beta.4" />
     <PackageReference Include="Azure.Identity" Version="1.14.0" />
     <PackageReference Include="Black.Beard.Helpers" Version="2.0.59" />
     <PackageReference Include="Black.Beard.Helpers.ContentLoaders.Files" Version="2.0.59" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
     <PackageReference Include="LibGit2Sharp" Version="0.31.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.5" />
-    <PackageReference Include="PdfPig" Version="0.1.10" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0-preview.5.25277.114" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.0-preview.5.25277.114" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0-preview.5.25277.114" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0-preview.5.25277.114" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="6.0.0-rc3" />
+    <PackageReference Include="PdfPig" Version="0.1.11-alpha-20250602-89abf" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageReference Include="System.CommandLine.Hosting" Version="0.4.0-alpha.22272.1" />
     <PackageReference Include="System.CommandLine.Rendering" Version="0.4.0-alpha.22272.1" />
@@ -26,6 +28,13 @@
   <ItemGroup>
     <ProjectReference Include="..\AILib\AILib.csproj" />
     <ProjectReference Include="..\Black.Beard.Configurations\Black.Beard.Configurations.csproj" />
+    <ProjectReference Include="..\Black.Beard.Logging.NLog\Black.Beard.Monitoring.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="nlog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

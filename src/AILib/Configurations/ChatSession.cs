@@ -31,7 +31,7 @@ namespace AILib.Configurations
 
         public Func<ChatSession, bool>? MustExecute { get; set; }
 
-        public ChatMessages Messages { get; private set; }
+        public ChatMessages? Messages { get; private set; }
 
         public uint Hash { get; private set; }
 

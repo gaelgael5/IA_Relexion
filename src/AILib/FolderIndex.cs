@@ -23,17 +23,18 @@ namespace AILib
         public FolderIndexDocument Get(Document document)
         {
 
-            var name = document.SourceFile?.Name;
+            var name = document.GetName();
             if (!string.IsNullOrEmpty(name))
             {
                 var item = this.FirstOrDefault(d => d.Name == name);
                 if (item != null)
                     return item;
 
-                item = new FolderIndexDocument();
+                item = new FolderIndexDocument() { Name = name };
                 this.Add(item);
 
                 return item;
+
             }
 
             throw new ArgumentException("Document does not have a valid source file name.", nameof(document));
@@ -52,13 +53,18 @@ namespace AILib
 
         public void Save()
         {
+
+            if (File == null)
+                throw new InvalidOperationException("File property is not set. Cannot save the index.");
+
             File.FullName.SerializesAndSave(this);
             Changed = false;
         }
 
         public static FolderIndex Empty => new FolderIndex();
 
-        public FileInfo File { get; internal set; }
+        public FileInfo? File { get; internal set; }
+
     }
 
 }

@@ -7,8 +7,9 @@ namespace AILib
     public class IndexStore : IDisposable
     {
 
-        public IndexStore()
+        public IndexStore(string? indexFileName = null)
         {
+            _indexFileName = indexFileName ?? ".index.json";
             this._dic = new Dictionary<string, FolderIndex>(StringComparer.OrdinalIgnoreCase);
         }
 
@@ -16,7 +17,7 @@ namespace AILib
         public FolderIndex GetOrCreate(FileInfo file)
         {
 
-            var file1 = file.Directory.Combine(".index.json").AsFile();
+            var file1 = file.Directory.Combine(_indexFileName).AsFile();
 
             if (!this._dic.TryGetValue(file1.FullName, out var index))
             {
@@ -44,7 +45,7 @@ namespace AILib
 
         }
 
-
+        private readonly string _indexFileName;
         private readonly Dictionary<string, FolderIndex> _dic;
         private bool disposedValue;
 
