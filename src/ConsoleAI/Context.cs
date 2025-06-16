@@ -11,7 +11,7 @@ namespace ConsoleAI
     public class Context
     {
 
-        public Context(string configFolder, DirectoryInfo directorySource, DirectoryInfo directoryTarget, string prompt, string azureService, string patternSource)
+        public Context(string configFolder, DirectoryInfo[] directorySources, DirectoryInfo directoryTarget, string prompt, string azureService, string patternSource)
         {
 
             DirectoryConfig = (configFolder ?? Directory.GetCurrentDirectory()).AsDirectory();
@@ -30,7 +30,7 @@ namespace ConsoleAI
             var idTemplate = "http://Black.Beard.com/schema/{0}";
             SchemaGenerator.Initialize(_directorySchemas, idTemplate);
 
-            DirectorySource = directorySource;
+            DirectorySources = directorySources;
             DirectoryTarget = directoryTarget;
             OutName = ".txt";
             AzureServiceName = azureService;
@@ -74,7 +74,7 @@ namespace ConsoleAI
 
         public AzureOptions? AzureOptions { get; internal set; }
 
-        public DirectoryInfo DirectorySource { get; }
+        public DirectoryInfo[] DirectorySources { get; }
 
         public DirectoryInfo DirectoryTarget { get; }
         public uint HashPrompt { get; }

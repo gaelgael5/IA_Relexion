@@ -15,7 +15,7 @@ namespace AILib.Configurations
 
 
 
-        private ChatClient Initialyze()
+        private ChatClient InitialyzeChat()
         {
             if (_chatClient == null)
             {
@@ -35,10 +35,10 @@ namespace AILib.Configurations
 
         public uint Hash { get; private set; }
 
-        public async Task<ChatMessageContent?> Ask(Action<List<ChatMessage>>? action = null)
+        public async Task<ChatMessageContent?> AskOnChat(Action<List<ChatMessage>>? action = null)
         {
 
-            var chat = Initialyze();
+            var chat = InitialyzeChat();
 
             if (chat != null)
             {

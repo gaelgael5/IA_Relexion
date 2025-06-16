@@ -5,7 +5,7 @@ namespace AILib.Configurations
 
         public float Temperature { get; set; } = 0.7f;
 
-        public int MaxOutputTokenCount { get; set; } = 1000;
+        public int MaxOutputTokenCount { get; set; } = 128000;
         
         public float TopP { get; set; } = 0.95f;
         

@@ -38,8 +38,11 @@ namespace ConsoleAI
     // --prompt "file:DocumentationFonctionnelle.txt"
 
     // --config "d:\test\ai" 
-    // --parse "D:\src_pickup\Colis21\src\Pssa.Colis21.TrackingApi" 
-    // --output "D:\test\outputc21\Pssa.Colis21.TrackingApi" 
+    // --parse "D:\src_pickup\Colis21\src\Pssa.Colis21.CollectRequestBatch"
+    // --parse "D:\src_pickup\Colis21\src\Pssa.Colis21.CollectRequestCore"
+    // --parse "D:\src_pickup\Colis21\src\Pssa.Colis21.CollectRequestMsg"
+    // --parse "D:\src_pickup\Colis21\src\Pssa.Colis21.CollectRequestWeb"
+    // --output "D:\test\outputc21\CollectRequest" 
     // --pattern "*.cs -all" 
     // --name ".md" --service "Dev" 
     // --prompt "file:DocumentationFonctionnelle.txt"
@@ -77,7 +80,8 @@ namespace ConsoleAI
             var gitOption = new Option<string>("--git", "connexion string to git container of the configuration");
             self.AddOption(gitOption);
 
-            var dirSourceOption = new Option<string>("--parse", "source folder");
+            var dirSourceOption = new Option<List<string>>("--parse", "source folder");
+            dirSourceOption.AllowMultipleArgumentsPerToken = true; // Allow multiple source directories
             self.AddOption(dirSourceOption);
 
             var dirTargetOption = new Option<string>("--output", "target folder");
@@ -96,7 +100,7 @@ namespace ConsoleAI
             self.AddOption(promptOption);
 
 
-            self.SetHandler((string config, string git, string sourceFolder, string targetFolder, string patternSource, string outName, string prompt, string azureService) =>
+            self.SetHandler((string config, string git, List<string> sourceFolder, string targetFolder, string patternSource, string outName, string prompt, string azureService) =>
             {
 
                 var ctx = LoadConfiguration(config, git, sourceFolder, targetFolder, patternSource, outName, prompt, azureService);
@@ -127,13 +131,13 @@ namespace ConsoleAI
                 IEnumerable<Document>? items = null;
 
                 if (ctx.Strategy == ParseStrategy.FileByFile)
-                    items = FolderParser.ParseFileByFile(store, ctx.DirectorySource, ctx.DirectoryTarget, (name) => name + ctx.OutName, ctx.PatternSource);
+                    items = FolderParser.ParseFileByFile(store, ctx.DirectorySources, ctx.DirectoryTarget, (name) => name + ctx.OutName, ctx.PatternSource);
 
                 else if (ctx.Strategy == ParseStrategy.ByFolder)
-                    items = FolderParser.ParseByFolder(store, ctx.DirectorySource, ctx.DirectoryTarget, (name) => name + ctx.OutName, ctx.PatternSource);
+                    items = FolderParser.ParseByFolder(store, ctx.DirectorySources, ctx.DirectoryTarget, (name) => name + ctx.OutName, ctx.PatternSource);
 
                 else if (ctx.Strategy == ParseStrategy.All)
-                    items = FolderParser.ParseOneShot(store, ctx.DirectorySource, ctx.DirectoryTarget, (name) => name + ctx.OutName, ctx.PatternSource);
+                    items = FolderParser.ParseOneShot(store, ctx.DirectorySources, ctx.DirectoryTarget, (name) => name + ctx.OutName, ctx.PatternSource);
 
                 else
                 {
@@ -190,7 +194,7 @@ namespace ConsoleAI
 
 
 
-            var taskMessage = chat.Ask(c =>
+            var taskMessage = chat.AskOnChat(c =>
             {
                 c.Add(Message.CreateUserMessage(ctx.Prompt));
 
@@ -198,8 +202,9 @@ namespace ConsoleAI
                     c.Add(Message.CreateUserTextAttachedDocument(item.FullName));
 
             });
-            taskMessage.Wait(); // Wait for the task to complete
-            var messages = taskMessage.Result; //await TaskMessage; // Wait for the task to complete
+
+            taskMessage.Wait();                 // Wait for the task to complete
+            var messages = taskMessage.Result;  // await TaskMessage; // Wait for the task to complete
 
             if (messages != null)
             {
@@ -233,13 +238,23 @@ namespace ConsoleAI
 
         }
 
-        private static Context LoadConfiguration(string config, string git, string sourceFolder, string targetFolder, string patternSource, string outName, string prompt, string azureService)
+        private static Context LoadConfiguration(string config, string git, List<string> sourceFolders, string targetFolder, string patternSource, string outName, string prompt, string azureService)
         {
 
-            var _directorySource = sourceFolder.AsDirectory() ?? throw new InvalidOperationException("Source directory not found.");
-            if (!_directorySource.Exists)
-                throw new InvalidOperationException("Source directory does not exist.");
+            #region source folders validation
+            var _directorySources =new List<DirectoryInfo>(sourceFolders.Count);
+            foreach (var sourceFolder in sourceFolders)
+            {
+                var dir = sourceFolder.AsDirectory() ?? throw new InvalidOperationException($"Source directory '{sourceFolder}' not found.");
+                dir.Refresh();
+                if (!dir.Exists)
+                    throw new InvalidOperationException($"Source directory '{sourceFolder}' does not exist.");
+                _directorySources.Add(dir);
+            }
+            #endregion source folders validation
 
+
+            #region target folders validation
             var _directoryTarget = targetFolder.AsDirectory() ?? throw new InvalidOperationException("Target directory not found.");
             if (!_directoryTarget.Exists)
                 _directoryTarget.Create();
@@ -249,8 +264,10 @@ namespace ConsoleAI
 
             if (string.IsNullOrEmpty(outName))
                 outName = ".md";
+            #endregion target folders validation
 
-            var ctx = new Context(config, _directorySource, _directoryTarget, prompt, azureService, patternSource)
+
+            var ctx = new Context(config, _directorySources.ToArray(), _directoryTarget, prompt, azureService, patternSource)
             {
                 OutName = outName,
             };
@@ -271,9 +288,12 @@ namespace ConsoleAI
                 throw new InvalidOperationException("configuration not found");
 
 
-            $"Parse and analyze {ctx.PatternSource} from folder '{ctx.DirectorySource.FullName}'".WriteGreen();
-            $"Generate {ctx.OutName} to '{ctx.DirectoryTarget.FullName}'".WriteGreen();
-            $"use service {ctx.AzureServiceName} with '{ctx.Prompt}'".WriteYellow();
+            $"Parse {ctx.PatternSource} from folders :".WriteGreen();
+            foreach (var source in ctx.DirectorySources)
+                $"  : '{source.FullName}'".WriteGreen();
+            $"Anayze with service {ctx.AzureServiceName}".WriteGreen();
+            $"using prompt '{ctx.Prompt}'".WriteYellow();
+            $"Generate file '{ctx.OutName}' in '{ctx.DirectoryTarget.FullName}'".WriteGreen();
 
 
             return ctx;

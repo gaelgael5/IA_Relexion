@@ -54,7 +54,7 @@ namespace IALibTest
 
             var pathTarget = Path.Combine(_directoryGit.FullName, "Documentation");
 
-            FolderParser.ParseFileByFile(new IndexStore(), _directoryProject, pathTarget.AsDirectory(), (name) => name + ".md", "*.cs")
+            FolderParser.ParseFileByFile(new IndexStore(), [_directoryProject], pathTarget.AsDirectory(), (name) => name + ".md", "*.cs")
                 .ToList()
                 .ForEach(item =>
                 {
@@ -116,7 +116,7 @@ Peux-tu me proposer une version plus claire ?";
 
 
             var chat = service.CreateChatSession();
-            var messages = await chat.Ask(c =>
+            var messages = await chat.AskOnChat(c =>
             {
                 c.Add(Message.CreateUserMessageFromFile(_directoryPrompts.Combine("Documentation.txt")));
                 c.Add(Message.CreateUserTextDocument(pathToParse));

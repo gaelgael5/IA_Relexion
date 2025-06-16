@@ -35,7 +35,6 @@ namespace AILib.Configurations
 
         public List<Message> Messages { get; set; }
 
-
         public ChatSession CreateChatSession()
         {
 
