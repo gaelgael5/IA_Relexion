@@ -15,4 +15,10 @@ var rootCommand = new RootCommand("Azure AI cli")
     .RegisterOptions()
     ;
 
-return await rootCommand.InvokeAsync(args);
+var result = await rootCommand.InvokeAsync(args);
+
+if (result != 0)
+{
+    Console.WriteLine($"Command failed with exit code {result}");
+    return;
+}

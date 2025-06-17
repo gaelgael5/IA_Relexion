@@ -48,7 +48,7 @@ namespace ConsoleAI
     // --prompt "file:DocumentationFonctionnelle.txt"
 
 
-    public static class Commands
+    public static partial class Commands
     {
 
         static Commands()
@@ -74,175 +74,43 @@ namespace ConsoleAI
         public static RootCommand RegisterOptions(this RootCommand self)
         {
 
-            var configOption = new Option<string>("--config", "configuration folder");
-            self.AddOption(configOption);
-
-            var gitOption = new Option<string>("--git", "connexion string to git container of the configuration");
-            self.AddOption(gitOption);
-
-            var dirSourceOption = new Option<List<string>>("--parse", "source folder");
-            dirSourceOption.AllowMultipleArgumentsPerToken = true; // Allow multiple source directories
-            self.AddOption(dirSourceOption);
-
-            var dirTargetOption = new Option<string>("--output", "target folder");
-            self.AddOption(dirTargetOption);
-
-            var dirPatternSourceOption = new Option<string>("--pattern", "globbing pattern source file");
-            self.AddOption(dirPatternSourceOption);
-
-            var dirPatternTargetOption = new Option<string>("--name", "extension for target file");
-            self.AddOption(dirPatternTargetOption);
-
-            var azureServiceOption = new Option<string>("--service", "azure service name");
-            self.AddOption(azureServiceOption);
-
-            var promptOption = new Option<string>("--prompt", "promps to apply. if the prompt is a file 'file:{filename}' or set directly the prompt");
-            self.AddOption(promptOption);
-
-
-            self.SetHandler((string config, string git, List<string> sourceFolder, string targetFolder, string patternSource, string outName, string prompt, string azureService) =>
-            {
-
-                var ctx = LoadConfiguration(config, git, sourceFolder, targetFolder, patternSource, outName, prompt, azureService);
-                Execute(ctx);
-
-            }, configOption, gitOption, dirSourceOption, dirTargetOption, dirPatternSourceOption, dirPatternTargetOption, promptOption, azureServiceOption);
+            self.AddCommand(RegisterChat());
 
             return self;
 
         }
 
-        private static void Execute(Context ctx)
+        private static bool AnalyzeResponse(ChatMessageContent messages, Document document, FolderIndexDocument indexFolder, ChatSession chat)
         {
+            bool test = false;
+            ChatMessageContentPart? message = messages.FirstOrDefault();
 
-            if (ctx.AzureOptions == null)
-                throw new InvalidOperationException("Azure options not found in configuration.");
-
-            var service = ctx.AzureOptions.OpenAIServices[ctx.AzureServiceName] ?? throw new InvalidOperationException("OpenAI service 'DevC#' not found in configuration.");
-            if (string.IsNullOrEmpty(service.Endpoint)) throw new InvalidOperationException("OpenAI service endpoint is not set in configuration.");
-
-            var chat = service.CreateChatSession();
-
-            Stopwatch stopwatch = new Stopwatch();
-
-            using (var store = new IndexStore($".{ctx.HashPrompt}.index.json"))
+            if (message != null && document.TargetFile != null)
             {
 
-                IEnumerable<Document>? items = null;
-
-                if (ctx.Strategy == ParseStrategy.FileByFile)
-                    items = FolderParser.ParseFileByFile(store, ctx.DirectorySources, ctx.DirectoryTarget, (name) => name + ctx.OutName, ctx.PatternSource);
-
-                else if (ctx.Strategy == ParseStrategy.ByFolder)
-                    items = FolderParser.ParseByFolder(store, ctx.DirectorySources, ctx.DirectoryTarget, (name) => name + ctx.OutName, ctx.PatternSource);
-
-                else if (ctx.Strategy == ParseStrategy.All)
-                    items = FolderParser.ParseOneShot(store, ctx.DirectorySources, ctx.DirectoryTarget, (name) => name + ctx.OutName, ctx.PatternSource);
-
+                if (message.SaveContent(document.TargetFile, out string filename))
+                {
+                    $"result saved : {filename}".WriteWhite();
+                    indexFolder.Map(document);
+                    indexFolder.Hash = chat.Hash;
+                    test = true;
+                }
                 else
-                {
-                    System.Diagnostics.Debugger.Break();
-                }
-
-                if (items == null)
-                    return;
-
-                uint hashCode = 0;
-                chat.MustExecute = c =>
-                {
-
-                    var o = c.Hash != hashCode;
-                    if (!o)
-                        $"Execution canceled: files haven't change since last run".WriteWhite();
-
-                    return o;
-                };
-
-                foreach (var item in items)
-                    if (item.TargetFile != null)
-                    {
-
-                        var indexFolder = item.Index.Get(item);
-                        hashCode = indexFolder.Hash;
-
-                        stopwatch.Reset();
-                        stopwatch.Start();
-
-                        bool s = Work(ctx, item, indexFolder, chat);
-                        item.Index.SetChanged(s);
-
-                        stopwatch.Stop();
-                        $"Executed in : {stopwatch.Elapsed.ToString("c")}".WriteWhite();
-
-                    }
+                    $"all results are not saved".WriteRed();
 
             }
 
-        }
+            if (messages.Count > 1)
+                System.Diagnostics.Debugger.Break();
 
-        private static bool Work(Context ctx, Document document, FolderIndexDocument indexFolder, ChatSession chat)
-        {
-
-            if (document.TargetFile == null)
-                return false;
-
-
-            $"Run on".WriteWhite();
-            foreach (var item in document.SourceFiles)
-                if (item.Exists)
-                    $"  file : '{item.FullName}'... ".WriteWhite();
-
-
-
-            var taskMessage = chat.AskOnChat(c =>
-            {
-                c.Add(Message.CreateUserMessage(ctx.Prompt));
-
-                foreach (var item in document.SourceFiles)
-                    c.Add(Message.CreateUserTextAttachedDocument(item.FullName));
-
-            });
-
-            taskMessage.Wait();                 // Wait for the task to complete
-            var messages = taskMessage.Result;  // await TaskMessage; // Wait for the task to complete
-
-            if (messages != null)
-            {
-
-                bool test = false;
-                ChatMessageContentPart? message = messages.FirstOrDefault();
-                
-                if (message != null) 
-                {
-
-                    if (message.SaveContent(document.TargetFile, out string filename))
-                    {
-                        $"result saved : {filename}".WriteWhite();
-                        indexFolder.Map(document);
-                        indexFolder.Hash = chat.Hash;
-                        test = true;
-                    }
-                    else
-                        $"all results are not saved".WriteRed();
-
-                }
-
-                if (messages.Count > 1)
-                    System.Diagnostics.Debugger.Break();
-
-                return test;
-
-            }
-
-            return false;
-
+            return test;
         }
 
         private static Context LoadConfiguration(string config, string git, List<string> sourceFolders, string targetFolder, string patternSource, string outName, string prompt, string azureService)
         {
 
             #region source folders validation
-            var _directorySources =new List<DirectoryInfo>(sourceFolders.Count);
+            var _directorySources = new List<DirectoryInfo>(sourceFolders.Count);
             foreach (var sourceFolder in sourceFolders)
             {
                 var dir = sourceFolder.AsDirectory() ?? throw new InvalidOperationException($"Source directory '{sourceFolder}' not found.");

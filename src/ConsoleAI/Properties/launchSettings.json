@@ -2,7 +2,7 @@
   "profiles": {
     "ConsoleAI": {
       "commandName": "Project",
-      "commandLineArgs": "--config \"d:\\test\\ai\" --parse \"D:\\src_pickup\\Colis21\\src\\Pssa.Colis21.CollectRequestBatch\" --parse \"D:\\src_pickup\\Colis21\\src\\Pssa.Colis21.CollectRequestCore\" --parse \"D:\\src_pickup\\Colis21\\src\\Pssa.Colis21.CollectRequestMsg\" --parse \"D:\\src_pickup\\Colis21\\src\\Pssa.Colis21.CollectRequestWeb\" --output \"D:\\test\\outputc21\\CollectRequest\" --pattern \"*.cs -all\" --name \".md\" --service \"Dev\" --prompt \"file:DocumentationFonctionnelle.txt\""
+      "commandLineArgs": "chat --config \"d:\\test\\ai\" --parse \"D:\\src_pickup\\Colis21\\src\\Pssa.Colis21.CollectRequestBatch\" --parse \"D:\\src_pickup\\Colis21\\src\\Pssa.Colis21.CollectRequestCore\" --parse \"D:\\src_pickup\\Colis21\\src\\Pssa.Colis21.CollectRequestMsg\" --parse \"D:\\src_pickup\\Colis21\\src\\Pssa.Colis21.CollectRequestWeb\" --output \"D:\\test\\outputc21\\CollectRequest\" --pattern \"*.cs -all\" --name \".md\" --service \"Dev\" --prompt \"file:DocumentationFonctionnelle.txt\""
     }
   }
 }
