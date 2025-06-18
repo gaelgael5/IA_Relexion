@@ -88,7 +88,7 @@ namespace AILib.Configurations
             var options = new ChatCompletionOptions
             {
                 Temperature = Tunes.Temperature,
-                MaxOutputTokenCount = Tunes.MaxOutputTokenCount,
+                //MaxOutputTokenCount = Tunes.MaxOutputTokenCount,
 
                 TopP = Tunes.TopP,
                 FrequencyPenalty = Tunes.FrequencyPenalty,
