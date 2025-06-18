@@ -29,7 +29,7 @@ namespace AILib.Helpers
 
             else if (messagePart.ImageBytes != null)
                 return messagePart.ImageBytes.ToArray().CalculateCrc32();
-            
+
             else
             {
                 Debugger.Break();
@@ -111,9 +111,9 @@ namespace AILib.Helpers
 
         }
 
-        public static bool SaveContent(this ChatMessageContentPart message, FileInfo file,  out string filename)
+        public static bool SaveContent(this ChatMessageContentPart message, FileInfo file, out string filename)
         {
-            
+
             if (message == null)
                 throw new ArgumentNullException(nameof(message), "ChatMessageContentPart cannot be null.");
 
@@ -145,7 +145,7 @@ namespace AILib.Helpers
                 {
                     file.Save(message.Text);
                 }
-                    
+
 
                 return true;
             }

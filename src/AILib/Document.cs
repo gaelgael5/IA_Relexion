@@ -10,7 +10,7 @@ namespace AILib
         public Document(FileInfo? targetFile, FolderIndex index, params FileInfo[] sourceFiles)
         {
             this._sourceFiles = new List<FileInfo>(sourceFiles);
-            this._targetFile = targetFile;
+            this.TargetFile = targetFile;
             this.Index = index;
         }
 
@@ -44,7 +44,7 @@ namespace AILib
         }
 
 
-        public readonly FileInfo? TargetFile => _targetFile;
+        public FileInfo? TargetFile { get; set; }
         
         public FolderIndex Index { get; }
 
@@ -55,7 +55,6 @@ namespace AILib
 
 
         private readonly List<FileInfo> _sourceFiles;
-        private readonly FileInfo? _targetFile;
         private string? _hash = null;
         private long? _length = null;
 

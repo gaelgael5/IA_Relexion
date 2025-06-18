@@ -1,7 +1,10 @@
 using Azure.AI.OpenAI;
+using Azure.Core.Pipeline;
 using Azure.Identity;
 using OpenAI.Chat;
+using System.ClientModel.Primitives;
 using System.Diagnostics;
+using System.Net;
 
 namespace AILib.Configurations
 {
@@ -20,6 +23,8 @@ namespace AILib.Configurations
         }
 
         public string Name { get; set; }
+
+        public string? Proxy { get; set; }
 
         public string Endpoint { get; set; }
 
@@ -46,11 +51,35 @@ namespace AILib.Configurations
         public AzureOpenAIClient GetClient()
         {
 
+            var options = new AzureOpenAIClientOptions
+            {
+            };
+
+            if (!string.IsNullOrWhiteSpace(Proxy))
+            {
+
+                // Configuration du proxy
+                var proxy = new WebProxy(this.Proxy)
+                {
+                    // Credentials optionnels si ton proxy nécessite une authentification
+                    // Credentials = new NetworkCredential("utilisateur", "motdepasse")
+                };
+
+                var handler = new HttpClientHandler
+                {
+                    Proxy = proxy,
+                    UseProxy = true
+                };
+
+                var httpClient = new HttpClient(handler);
+                options.Transport = new HttpClientPipelineTransport(httpClient);
+
+            }
+
             if (string.IsNullOrWhiteSpace(this.ApiKey))
                 return new AzureOpenAIClient(new Uri(Endpoint), new DefaultAzureCredential());
 
-
-            return new AzureOpenAIClient(new Uri(Endpoint), new Azure.AzureKeyCredential(this.ApiKey));
+            return new AzureOpenAIClient(new Uri(Endpoint), new Azure.AzureKeyCredential(this.ApiKey), options);
 
         }
 
@@ -70,6 +99,7 @@ namespace AILib.Configurations
                 IncludeLogProbabilities = Tunes.IncludeLogProbabilities,
                 StoredOutputEnabled = Tunes.StoredOutputEnabled,
                 TopLogProbabilityCount = Tunes.TopLogProbabilityCount,
+
             };
 
             return options;
@@ -93,7 +123,7 @@ namespace AILib.Configurations
             foreach (var message in Messages)
                 if (message.Position == Position.Post && !string.IsNullOrWhiteSpace(message.Text))
                     messages.Add(message.GetMessage());
-         
+
             return messages;
 
         }

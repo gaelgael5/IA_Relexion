@@ -2,12 +2,9 @@
 // See https://aka.ms/new-console-template for more information
 
 
-
-using Bb;
 using Bb.Logging.NLog;
 using ConsoleAI;
 using System.CommandLine;
-
 
 NLogInitializer.Execute();
 

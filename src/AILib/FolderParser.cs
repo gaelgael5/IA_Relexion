@@ -1,17 +1,14 @@
 ﻿
 using Bb;
-using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace AILib
 {
 
-
     public static class FolderParser
     {
 
-        public static IEnumerable<Document> ParseFileByFile(IndexStore store, DirectoryInfo[] sourceFolderPaths, DirectoryInfo targetFolderPath, Func<string, string> targetFileGenerator, string pattern)
+        public static IEnumerable<Document> ParseFileByFile(IndexStore store, DirectoryInfo[] sourceFolderPaths, FileInfo[] sourceFilePaths, DirectoryInfo targetFolderPath, Func<string, string> targetFileGenerator, string pattern)
         {
-
 
             if (targetFolderPath == null)
                 throw new ArgumentNullException(nameof(targetFolderPath), "Target folder path cannot be null or empty.");
@@ -21,6 +18,7 @@ namespace AILib
 
             if (string.IsNullOrEmpty(pattern))
                 pattern = "*.*";
+
 
             foreach (var sourceFolderPath in sourceFolderPaths)
             {
@@ -34,22 +32,21 @@ namespace AILib
 
 
                 FolderIndex? lastIndex = null;
-                foreach (FileInfo item in sourceFolderPath.EnumerateFiles(pattern, SearchOption.AllDirectories))
+
+                var files = sourceFolderPath.EnumerateFiles(pattern, SearchOption.AllDirectories);
+
+                foreach (FileInfo item in files)
                 {
 
                     item.Refresh();
                     if (item.Exists && !item.Attributes.HasFlag(FileAttributes.Hidden))
                     {
 
-                        var targetFolder = item.Directory?.FullName.Substring(l).Trim('\\') ?? string.Empty;
-                        targetFolder = targetFolderPath.Combine(targetFolder);
-
-                        var targetName = Path.GetFileNameWithoutExtension(item.Name);
-                        targetName = targetFileGenerator(targetName);
-
+                        var targetFolder = targetFolderPath.Combine(item.Directory?.FullName.Substring(l).Trim('\\') ?? string.Empty);
+                        var targetName = targetFileGenerator(Path.GetFileNameWithoutExtension(item.Name));
                         var targetFile = new FileInfo(Path.Combine(targetFolder, targetName));
-                        targetFile.Refresh();
 
+                        targetFile.Refresh();
 
                         Document itemS = Document.Empty;
                         FolderIndex index = store.GetOrCreate(targetFile);
@@ -72,7 +69,7 @@ namespace AILib
 
                     }
 
-                }
+                }               
 
             }
 
@@ -80,8 +77,7 @@ namespace AILib
 
         }
 
-
-        public static IEnumerable<Document> ParseByFolder(IndexStore store, DirectoryInfo[] sourceFolderPaths, DirectoryInfo targetFolderPath, Func<string, string> targetFileGenerator, string pattern)
+        public static IEnumerable<Document> ParseByFolder(IndexStore store, DirectoryInfo[] sourceFolderPaths, FileInfo[] sourceFilePaths, DirectoryInfo targetFolderPath, Func<string, string> targetFileGenerator, string pattern)
         {
 
 
@@ -110,12 +106,10 @@ namespace AILib
                 foreach (DirectoryInfo dir in sourceFolderPath.EnumerateDirectories("*.", SearchOption.AllDirectories))
                 {
 
-                    var targetFolder = dir.FullName.Substring(l).Trim('\\') ?? string.Empty;
-                    targetFolder = targetFolderPath.Combine(targetFolder);
-
+                    var targetFolder = targetFolderPath.Combine(dir.FullName.Substring(l).Trim('\\') ?? string.Empty);
                     var targetName = targetFileGenerator(dir.Name);
-
                     var targetFile = new FileInfo(Path.Combine(targetFolder, targetName));
+
                     targetFile.Refresh();
 
                     Document itemS = Document.Empty;
@@ -151,7 +145,7 @@ namespace AILib
 
         }
 
-        public static IEnumerable<Document> ParseOneShot(IndexStore store, DirectoryInfo[] sourceFolderPaths, DirectoryInfo targetFolderPath, Func<string, string> targetFileGenerator, string pattern)
+        public static IEnumerable<Document> ParseOneShot(IndexStore store, DirectoryInfo[] sourceFolderPaths, FileInfo[] sourceFilePaths, DirectoryInfo targetFolderPath, Func<string, string> targetFileGenerator, string pattern)
         {
 
 
@@ -188,8 +182,7 @@ namespace AILib
                 lastIndex.Save();
             lastIndex = index;
 
-            List<FileInfo> files = new List<FileInfo>();
-
+            List<FileInfo> files = [.. sourceFilePaths];
 
             foreach (var sourceFolderPath in sourceFolderPaths)
             {

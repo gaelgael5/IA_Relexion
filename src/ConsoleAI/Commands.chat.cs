@@ -32,17 +32,17 @@ namespace ConsoleAI
 
             cmd.AddOption(configOpt = new Option<string>("--config", "configuration folder"));
             cmd.AddOption(gitOpt = new Option<string>("--git", "connexion string to git container of the configuration"));
-            cmd.AddOption(dirSourceOpt = new Option<List<string>>("--parse", "source folder") { AllowMultipleArgumentsPerToken = true });
-            cmd.AddOption(dirTargetOpt = new Option<string>("--output", "target folder"));
+            cmd.AddOption(dirSourceOpt = new Option<List<string>>("--parse", "source (folder or file)") { AllowMultipleArgumentsPerToken = true });
+            cmd.AddOption(dirTargetOpt = new Option<string>("--output", "target folder or file"));
             cmd.AddOption(dirPatternSourceOpt = new Option<string>("--pattern", "globbing pattern source file and mode. e.g. '*.cs'. you can specify the mode like -folder (all files are group by parent folder) or -all (all files are sent in one shot)"));
             cmd.AddOption(dirPatternTargetOpt = new Option<string>("--name", "extension for target file"));
             cmd.AddOption(azureServiceOpt = new Option<string>("--service", "azure service name"));
             cmd.AddOption(promptOpt = new Option<string>("--prompt", "promps to apply. if the prompt is a file 'file:{filename}' or set directly the prompt"));
 
-            cmd.SetHandler((string config, string git, List<string> sourceFolder, string targetFolder, string patternSource, string outName, string prompt, string azureService) =>
+            cmd.SetHandler((string config, string git, List<string> sources, string targetPath, string patternSource, string outName, string prompt, string azureService) =>
             {
                 
-                ExecuteChat(LoadConfiguration(config, git, sourceFolder, targetFolder, patternSource, outName, prompt, azureService));
+                ExecuteChat(LoadConfiguration(config, git, sources, targetPath, patternSource, outName, prompt, azureService));
 
             }, configOpt, gitOpt, dirSourceOpt, dirTargetOpt, dirPatternSourceOpt, dirPatternTargetOpt, promptOpt, azureServiceOpt);
 
@@ -69,13 +69,13 @@ namespace ConsoleAI
                 IEnumerable<Document>? items = null;
 
                 if (ctx.Strategy == ParseStrategy.FileByFile)
-                    items = FolderParser.ParseFileByFile(store, ctx.DirectorySources, ctx.DirectoryTarget, (name) => name + ctx.OutName, ctx.PatternSource);
+                    items = FolderParser.ParseFileByFile(store, ctx.DirectorySources, ctx.FileSources, ctx.TargetDirectory, (name) => name + ctx.OutName, ctx.PatternSource);
 
                 else if (ctx.Strategy == ParseStrategy.ByFolder)
-                    items = FolderParser.ParseByFolder(store, ctx.DirectorySources, ctx.DirectoryTarget, (name) => name + ctx.OutName, ctx.PatternSource);
+                    items = FolderParser.ParseByFolder(store, ctx.DirectorySources, ctx.FileSources, ctx.TargetDirectory, (name) => name + ctx.OutName, ctx.PatternSource);
 
                 else if (ctx.Strategy == ParseStrategy.All)
-                    items = FolderParser.ParseOneShot(store, ctx.DirectorySources, ctx.DirectoryTarget, (name) => name + ctx.OutName, ctx.PatternSource);
+                    items = FolderParser.ParseOneShot(store, ctx.DirectorySources, ctx.FileSources, ctx.TargetDirectory, (name) => name + ctx.OutName, ctx.PatternSource);
 
                 else
                 {
@@ -120,6 +120,9 @@ namespace ConsoleAI
 
         private static bool WorkWithChat(Context ctx, Document document, FolderIndexDocument indexFolder, ChatSession chat)
         {
+
+            if (ctx.TargetFile != null)
+                document.TargetFile = ctx.TargetFile; 
 
             if (document.TargetFile == null)
                 return false;

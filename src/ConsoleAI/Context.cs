@@ -1,8 +1,9 @@
 ﻿using AILib.Configurations;
+using AILib.Helpers;
 using Bb;
 using Bb.Schemas;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Identity.Client;
+using System.Diagnostics;
 
 namespace ConsoleAI
 {
@@ -11,8 +12,34 @@ namespace ConsoleAI
     public class Context
     {
 
-        public Context(string configFolder, DirectoryInfo[] directorySources, DirectoryInfo directoryTarget, string prompt, string azureService, string patternSource)
+        public Context(string configFolder, DirectoryInfo[] directorySources, FileInfo[] fileSources, string targetPath, string prompt, string azureService, string patternSource)
         {
+
+            switch (targetPath.EvaluateDocument())
+            {
+
+                case IOType.File:
+                    var fileTarget = targetPath.AsFile() ?? throw new InvalidOperationException("Target directory not found.");
+                    if (!fileTarget.Directory.Exists)
+                        fileTarget.Directory.Create();
+                    TargetDirectory = fileTarget.Directory;
+                    TargetFile = fileTarget;
+                    break;
+
+                case IOType.Folder:
+                    var directoryTarget = targetPath.AsDirectory() ?? throw new InvalidOperationException("Target directory not found.");
+                    if (!directoryTarget.Exists)
+                        directoryTarget.Create();
+                    TargetDirectory = directoryTarget;
+                    break;
+
+                case IOType.None:
+                default:
+                    break;
+            }
+
+
+
 
             DirectoryConfig = (configFolder ?? Directory.GetCurrentDirectory()).AsDirectory();
             if (!DirectoryConfig.Exists)
@@ -30,10 +57,11 @@ namespace ConsoleAI
             var idTemplate = "http://Black.Beard.com/schema/{0}";
             SchemaGenerator.Initialize(_directorySchemas, idTemplate);
 
-            DirectorySources = directorySources;
-            DirectoryTarget = directoryTarget;
+            DirectorySources = directorySources ?? Array.Empty<DirectoryInfo>(); // Ensure directorySources is not null
+            FileSources = fileSources ?? Array.Empty<FileInfo>();                // Ensure fileSources is not null
             OutName = ".txt";
             AzureServiceName = azureService;
+
 
             if (prompt.ToLowerInvariant().StartsWith("file:"))
             {
@@ -76,7 +104,12 @@ namespace ConsoleAI
 
         public DirectoryInfo[] DirectorySources { get; }
 
-        public DirectoryInfo DirectoryTarget { get; }
+        public FileInfo[] FileSources { get; }
+
+        public DirectoryInfo TargetDirectory { get; }
+
+        public FileInfo? TargetFile { get; }
+
         public uint HashPrompt { get; }
         public string PatternSource { get; set; }
 

@@ -1,7 +1,4 @@
-﻿
-
-
-using Bb;
+﻿using Bb;
 
 namespace AILib
 {

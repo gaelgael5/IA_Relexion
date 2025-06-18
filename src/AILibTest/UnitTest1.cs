@@ -54,7 +54,7 @@ namespace IALibTest
 
             var pathTarget = Path.Combine(_directoryGit.FullName, "Documentation");
 
-            FolderParser.ParseFileByFile(new IndexStore(), [_directoryProject], pathTarget.AsDirectory(), (name) => name + ".md", "*.cs")
+            FolderParser.ParseFileByFile(new IndexStore(), [_directoryProject], [], pathTarget.AsDirectory(), (name) => name + ".md", "*.cs")
                 .ToList()
                 .ForEach(item =>
                 {

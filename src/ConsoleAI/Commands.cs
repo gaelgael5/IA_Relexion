@@ -37,11 +37,11 @@ namespace ConsoleAI
     // --name ".md" --service "Dev" 
     // --prompt "file:DocumentationFonctionnelle.txt"
 
+    /// chat
     // --config "d:\test\ai" 
-    // --parse "D:\src_pickup\Colis21\src\Pssa.Colis21.CollectRequestBatch"
-    // --parse "D:\src_pickup\Colis21\src\Pssa.Colis21.CollectRequestCore"
-    // --parse "D:\src_pickup\Colis21\src\Pssa.Colis21.CollectRequestMsg"
-    // --parse "D:\src_pickup\Colis21\src\Pssa.Colis21.CollectRequestWeb"
+    // --parse "D:\src_pickup\Colis21\src\Pssa.Colis21.DatawarehouseBatch"
+    // --parse "D:\src_pickup\Colis21\src\Pssa.Colis21.DatawarehouseCore"
+    // --parse "D:\src_pickup\Colis21\src\Pssa.Colis21.DatawarehouseMsg"
     // --output "D:\test\outputc21\CollectRequest" 
     // --pattern "*.cs -all" 
     // --name ".md" --service "Dev" 
@@ -106,26 +106,51 @@ namespace ConsoleAI
             return test;
         }
 
-        private static Context LoadConfiguration(string config, string git, List<string> sourceFolders, string targetFolder, string patternSource, string outName, string prompt, string azureService)
+        private static Context LoadConfiguration(string config, string git, List<string> sources, string targetPath, string patternSource, string outName, string prompt, string azureService)
         {
 
-            #region source folders validation
-            var _directorySources = new List<DirectoryInfo>(sourceFolders.Count);
-            foreach (var sourceFolder in sourceFolders)
+            #region source validation
+            var _directorySources = new List<DirectoryInfo>(sources.Count);
+            var _fileSources = new List<FileInfo>(sources.Count);
+            foreach (var sourceFolder in sources)
             {
-                var dir = sourceFolder.AsDirectory() ?? throw new InvalidOperationException($"Source directory '{sourceFolder}' not found.");
-                dir.Refresh();
-                if (!dir.Exists)
-                    throw new InvalidOperationException($"Source directory '{sourceFolder}' does not exist.");
-                _directorySources.Add(dir);
+
+                switch (sourceFolder.EvaluateDocument())
+                {
+
+                    case IOType.File:
+                        var file = sourceFolder.AsFile()
+                            ?? throw new InvalidOperationException($"Source file '{sourceFolder}' not found.");
+                        file.Refresh();
+                        if (!file.Exists)
+                            throw new InvalidOperationException($"Source file '{sourceFolder}' does not exist.");
+                        _fileSources.Add(file);
+                        break;
+
+                    case IOType.Folder:
+                        var dir = sourceFolder.AsDirectory()
+                            ?? throw new InvalidOperationException($"Source directory '{sourceFolder}' not found.");
+                        dir.Refresh();
+                        if (!dir.Exists)
+                            throw new InvalidOperationException($"Source directory '{sourceFolder}' does not exist.");
+                        _directorySources.Add(dir);
+                        break;
+
+                    case IOType.None:
+                    default:
+                        break;
+                }
+
+          
             }
-            #endregion source folders validation
+            #endregion source validation
 
 
             #region target folders validation
-            var _directoryTarget = targetFolder.AsDirectory() ?? throw new InvalidOperationException("Target directory not found.");
-            if (!_directoryTarget.Exists)
-                _directoryTarget.Create();
+
+
+            
+
 
             if (string.IsNullOrEmpty(patternSource))
                 patternSource = "*.cs";
@@ -135,7 +160,7 @@ namespace ConsoleAI
             #endregion target folders validation
 
 
-            var ctx = new Context(config, _directorySources.ToArray(), _directoryTarget, prompt, azureService, patternSource)
+            var ctx = new Context(config, _directorySources.ToArray(), _fileSources.ToArray(), targetPath, prompt, azureService, patternSource)
             {
                 OutName = outName,
             };
@@ -161,7 +186,7 @@ namespace ConsoleAI
                 $"  : '{source.FullName}'".WriteGreen();
             $"Anayze with service {ctx.AzureServiceName}".WriteGreen();
             $"using prompt '{ctx.Prompt}'".WriteYellow();
-            $"Generate file '{ctx.OutName}' in '{ctx.DirectoryTarget.FullName}'".WriteGreen();
+            $"Generate file '{ctx.OutName}' in '{ctx.TargetDirectory.FullName}'".WriteGreen();
 
 
             return ctx;
